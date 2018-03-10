@@ -1,5 +1,9 @@
 # IKE-smooth
 
+## Running
+`sage run.sage`  
+This will completley use three of your cores
+
 ## Best Results
 *3/10/18 17:46*  
 **A** = 1130383841129506271129152981128925390000000000000000000000000000000000000000000000534  
