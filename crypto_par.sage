@@ -25,7 +25,9 @@ def search_space():
                            
 
 def max_prime_fact(A):
-	cur_n = 2.modpower(A,p)
+	global bestResult, new_results, old_results, count_As_factored
+
+	cur_n = 2.powermod(A,p)
 
 	if cur_n == 1 or is_pseudoprime(cur_n) and is_prime(cur_n):
 		max_p_fact = cur_n
@@ -48,16 +50,25 @@ def max_prime_fact(A):
 			count_As_factored += 1
 
 	if A % pref == 0:
-		print 'time', int(time.time()), 'A', A, 'bestA', bestA
+		print 'time', int(time.time()), 'A', A, 'bestA', bestResult[1]
 		
 	result = (max_p_fact,A)
 	new_results.append(result)
 	return result
 
 
-def main():
-	start = time.time()
+def seq():
+	global bestResult
+	for A in search_space():
+		(max_p_fact,A) = max_prime_fact(A)
+		if max_p_fact < bestResult[0]:
+			bestResult = (max_p_fact,A)
+	bestA = bestResult[1]
 
+	return  bestA
+
+
+def par():
 	pool = multiprocessing.Pool(3)
 	out = zip(*pool.map(max_prime_fact, search_space()))
 	result = min(zip(*out))
@@ -65,11 +76,16 @@ def main():
 	mess = result[0]
 	bestA = result[1]
 
+def main():	
+	start = time.time()
+
+	bestA = par()	
+
 	print
 	print '-'*15
 	print '-'*15
 	print "A=", bestA
-	print "2^A=", factor(2.modpower(bestA,p))
+	print "2^A=", factor(2.powermod(bestA,p))
 
 	runtime = time.time() - start
 	print runtime, "seconds"
