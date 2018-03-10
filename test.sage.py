@@ -23,6 +23,8 @@ def test(A, n_primes_used):
     print(int(log(big_factor)/log(_sage_const_2 )))
 
 
+# Example usage
+# sage test.sage 113038384112950627112915298112892539000000000000000000000000000000000000000598 100
 if __name__ == '__main__':
     A = int(sys.argv[_sage_const_1 ])
     n_primes_used = int(sys.argv[_sage_const_2 ])
