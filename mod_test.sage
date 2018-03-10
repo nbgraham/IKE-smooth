@@ -47,3 +47,4 @@ nick@nick-Inspiron-
 
 power_mod is pretty slow
 Using field of integers is slightly faster than 2.powermod
+'''
