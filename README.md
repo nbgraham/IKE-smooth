@@ -62,3 +62,23 @@ Wall time: 3.04 s
 
 We iterate through the list about 2^1023 times, but only create it once.  
 **primes_first_n is winner**
+
+### Power mod functions
+```
+nick@nick-Inspiron-7559:~/Developer/IKE-smooth$ sage mod_test.sage
+0.0104689598083
+0.00123405456543
+0.0061628818512
+nick@nick-Inspiron-7559:~/Developer/IKE-smooth$ sage mod_test.sage
+0.0106110572815
+0.000602006912231
+0.000718116760254
+nick@nick-Inspiron-7559:~/Developer/IKE-smooth$ sage mod_test.sage
+0.0110380649567
+0.000602960586548
+0.000695943832397
+nick@nick-Inspiron-
+```
+
+power_mod is pretty slow
+Using field of integers is slightly faster than 2.powermod
