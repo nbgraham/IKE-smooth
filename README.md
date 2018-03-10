@@ -82,3 +82,14 @@ nick@nick-Inspiron-
 
 power_mod is pretty slow
 Using field of integers is slightly faster than 2.powermod
+
+
+### Checking primes before removing factors
+
+```
+nick@nick-Inspiron-7559:~/Developer/IKE-smooth$ sage prime_test.sage
+1.84293699265
+1.29911899567
+```
+
+Checking primes before is faster. (Also note that we must check if it is 1 because 1 is not prime)
