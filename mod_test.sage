@@ -18,7 +18,7 @@ start = time.time()
 for i in range(loops):
 	for b in bs:
 		for two in twos:
-			two**b
+			(two^b).lift()
 print time.time() - start
 
 start = time.time()
@@ -47,4 +47,17 @@ nick@nick-Inspiron-
 
 power_mod is pretty slow
 Using field of integers is slightly faster than 2.powermod
+'''
+
+'''
+nick@nick-Inspiron-7559:~/Developer/IKE-smooth$ sage mod_test.sage
+0.011048078537
+0.000662088394165
+0.000630855560303
+nick@nick-Inspiron-7559:~/Developer/IKE-smooth$ sage mod_test.sage
+0.0107650756836
+0.000651121139526
+0.000627994537354
+
+2.powermod is actually slightly better when you account for the lift that is necessary for factoring/modulus
 '''
