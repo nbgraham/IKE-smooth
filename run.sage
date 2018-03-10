@@ -28,16 +28,17 @@ def search_space():
 def power_max_prime_fact(A):
 	global bestResult, new_results, count_As_factored
 	
-	cur_n = 2.powermod(A,p)
+	n = 2.powermod(A,p)
 	p_offset = 0
 
-	if cur_n == 1 or is_pseudoprime(cur_n) and is_prime(cur_n):
-		max_p_fact = cur_n
+	if n == 1 or is_pseudoprime(n) and is_prime(n):
+		max_p_fact = n
 		count_As_factored += 1
 	else:
 		max_p = 0
 		max_p_fact = float("inf")
 		
+		cur_n = n
 		for fac in small_primes:
 			while cur_n % fac == 0:
 				cur_n = cur_n // fac
@@ -48,14 +49,14 @@ def power_max_prime_fact(A):
 			
 			# If it is promising also try adding p's to RHS since that will be equivalent mod p
 			if max_p_fact < bestResult[0]:
-				cur_n = cur_n + p
+				n_eq = n + p
 				count_p = 1
-				while count_p < 100 and cur_n < p_squared:
-					mod_max_p_fact = max_prime_fact(cur_n)
+				while count_p < 100 and n_eq < p_squared:
+					mod_max_p_fact = max_prime_fact(n_eq)
 					if mod_max_p_fact < max_p_fact:
 						max_p_fact = mod_max_p_fact
 						p_offset = count_p
-					cur_n = cur_n + p
+					n_eq = n_eq + p
 					count_p += 1
 
 			if count_As_factored % 100 == 0:
