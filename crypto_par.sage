@@ -10,7 +10,7 @@ two = R(2)
 min_max_prime_factor = p
 bestResult = (float("inf"),pref)
 
-small_primes = primes(1 << 40)
+small_primes = primes_first_n(1000)
 
 new_results = []
 old_results = []
@@ -19,11 +19,12 @@ count_As_factored = 1
 
 def search_space():
 	base = pref*100
+	step = pref
 	for power in range(3,342):
 		base = base * 10
-		step = 10**(power-3)
-		for i in range(0, 10**power, step):
+		for i in range(1000):
 			yield (base + i)
+		step = step * 10 
                            
 
 def max_prime_fact(A):
