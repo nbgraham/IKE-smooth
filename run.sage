@@ -8,7 +8,8 @@ pref = 113038384112950627112915298112892539 # 0b10101110001010011100011111110000
 min_max_prime_factor = p
 bestResult = (float("inf"),pref,0)
 
-small_primes = primes_first_n(4000)
+small_primes = primes_first_n(23100000)
+# Almost reaches the max prime computable by sage (pari): 436273290
 
 new_results = []
 count_As_factored = 1
@@ -51,7 +52,7 @@ def power_max_prime_fact(A):
 			if max_p_fact < bestResult[0]:
 				n_eq = n + p
 				count_p = 1
-				while count_p < 100 and n_eq < p_squared:
+				while count_p < 10 and n_eq < p_squared:
 					mod_max_p_fact = max_prime_fact(n_eq)
 					if mod_max_p_fact < max_p_fact:
 						max_p_fact = mod_max_p_fact
@@ -65,7 +66,7 @@ def power_max_prime_fact(A):
 			count_As_factored += 1
 
 	if A % pref == 0:
-		print 'time', int(time.time()-start_time), 'A', A, 'bestA', bestResult[1], 'bestOffset', bestResult[2]
+		print 'time', int(time.time()-start_time), 'bestA', bestResult[1], 'bestOffset', bestResult[2]
 	
 	result = (max_p_fact,A,p_offset)
 	new_results.append(result)
@@ -103,7 +104,7 @@ def seq():
 
 
 def par():
-	pool = multiprocessing.Pool(2)
+	pool = multiprocessing.Pool(3)
 	out = zip(*pool.map(power_max_prime_fact, search_space()))
 	result = min(zip(*out))
 
