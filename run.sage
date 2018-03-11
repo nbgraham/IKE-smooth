@@ -50,6 +50,8 @@ def power_max_prime_fact(A):
 			
 			# If it is promising also try adding p's to RHS since that will be equivalent mod p
 			if max_p_fact < bestResult[0]:
+				print 'time', int(time.time()-start_time), 'Possible best A found', A
+				start = time.time()
 				n_eq = n + p
 				count_p = 1
 				while count_p < 10 and n_eq < p_squared:
@@ -59,6 +61,7 @@ def power_max_prime_fact(A):
 						p_offset = count_p
 					n_eq = n_eq + p
 					count_p += 1
+				print 'Checking mod p took', time.time() - start, 'seconds'
 
 			if count_As_factored % 100 == 0:
 				bestResult = min([min(new_results),bestResult])
