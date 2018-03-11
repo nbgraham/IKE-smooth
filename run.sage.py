@@ -33,16 +33,17 @@ def search_space():
 def power_max_prime_fact(A):
 	global bestResult, new_results, count_As_factored
 	
-	cur_n = _sage_const_2 .powermod(A,p)
+	n = _sage_const_2 .powermod(A,p)
 	p_offset = _sage_const_0 
 
-	if cur_n == _sage_const_1  or is_pseudoprime(cur_n) and is_prime(cur_n):
-		max_p_fact = cur_n
+	if n == _sage_const_1  or is_pseudoprime(n) and is_prime(n):
+		max_p_fact = n
 		count_As_factored += _sage_const_1 
 	else:
 		max_p = _sage_const_0 
 		max_p_fact = float("inf")
 		
+		cur_n = n
 		for fac in small_primes:
 			while cur_n % fac == _sage_const_0 :
 				cur_n = cur_n // fac
@@ -53,14 +54,14 @@ def power_max_prime_fact(A):
 			
 			# If it is promising also try adding p's to RHS since that will be equivalent mod p
 			if max_p_fact < bestResult[_sage_const_0 ]:
-				cur_n = cur_n + p
+				n_eq = n + p
 				count_p = _sage_const_1 
-				while count_p < _sage_const_100  and cur_n < p_squared:
-					mod_max_p_fact = max_prime_fact(cur_n)
+				while count_p < _sage_const_100  and n_eq < p_squared:
+					mod_max_p_fact = max_prime_fact(n_eq)
 					if mod_max_p_fact < max_p_fact:
 						max_p_fact = mod_max_p_fact
 						p_offset = count_p
-					cur_n = cur_n + p
+					n_eq = n_eq + p
 					count_p += _sage_const_1 
 
 			if count_As_factored % _sage_const_100  == _sage_const_0 :
