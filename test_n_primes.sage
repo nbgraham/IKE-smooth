@@ -76,8 +76,8 @@ def test_n_par((i, n, n_epochs, n_factored, ns_tested)):
 
 
 def main():
-    ns_primes = [4000,10000,50000,100000,500000,1000000]
-    n_factored = 5
+    ns_primes = [500, 1000, 2000, 3000, 4000,10000,50000,100000,500000,1000000]
+    n_factored = 6
     n_epochs = 4
 
     results = [0 for _ in range(len(ns_primes))]
