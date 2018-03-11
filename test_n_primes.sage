@@ -1,4 +1,6 @@
 import time
+import multiprocessing
+
 
 '''
 sage: prime_pi(436273290)
@@ -63,25 +65,36 @@ def test_n(n_primes, n_factored, gen):
     return time.time() - start
 
 
+def test_n_par((i, n, n_epochs, n_factored, ns_tested)):
+    gen = search_space()
+    results = []
+    for epoch in range(n_epochs):
+            time = test_n(n, n_factored, gen)
+            print str(epoch) + '/' + str(n_epochs), ':', str(i) + '/' + str(ns_tested), '(' + str(n) + ')', ' -- ', time
+            results.append(time)
+    return results
+
+
 def main():
     ns_primes = [4000,10000,50000,100000,500000,1000000]
-    n_factored = 4
-    n_epochs = 3
+    n_factored = 5
+    n_epochs = 4
 
-    gens = [search_space() for _ in range(len(ns_primes))]
     results = [0 for _ in range(len(ns_primes))]
 
-    print 'Primes to test: ', ns_primes, 'Factoring', n_factored, 'primes for ', n_epochs, 'epochs'
-    for epoch in range(n_epochs):
-        for i, n in enumerate(ns_primes):
-            print str(epoch) + '/' + str(n_epochs), ':', str(i) + '/' + str(len(ns_primes)), '(' + str(n) + ')', ' -- ',
-            time = test_n(n, n_factored, gens[i])
-            print (time)
-            results[i] += time
-        print
+    print 'Primes to test: ', ns_primes, 'Factoring', n_factored, 'primes for', n_epochs, 'epochs'
+    pool = multiprocessing.Pool(3)
+    t_args = [(i, n, n_epochs, 4, len(ns_primes)) for (i, n) in enumerate(ns_primes)]
+    out = zip(ns_primes, pool.map(test_n_par, t_args))
 
-    average_results = [(sum_time/n_epochs,n_primes) for (sum_time,n_primes) in zip(results,ns_primes)]
-    print(sorted(average_results))
+    average_results = [(sum(times)/n_epochs,n_primes) for (n_primes, times) in out]
+    print 'Avg:', sorted(average_results)
+
+    min_results = [(min(times),n_primes) for (n_primes, times) in out]
+    print 'Min:', sorted(min_results)
+
+    max_results = [(max(times),n_primes) for (n_primes, times) in out]
+    print 'Max:', sorted(max_results)
 
 
 if __name__ == '__main__':
