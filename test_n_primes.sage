@@ -50,10 +50,9 @@ def max_prime_fact(A, small_primes):
 	return max_p_fact < float("inf")
 
 
-def test_n(n_primes, n_factored):
+def test_n(n_primes, n_factored, gen):
     start = time.time()
     small_primes = primes_first_n(n_primes)
-    gen = search_space()
 
     count = 0
     while count < n_factored:
@@ -65,21 +64,23 @@ def test_n(n_primes, n_factored):
 
 
 def main():
-    ns_primes = [2000,2500,3000,3500,4000]
-    n_factored = 40
+    ns_primes = [4000,10000,50000,100000,500000,1000000]
+    n_factored = 4
+    n_epochs = 3
 
-    results = {}
-    for n in ns_primes:
-        results[n] = []
+    gens = [search_space() for _ in range(len(ns_primes))]
+    results = [0 for _ in range(len(ns_primes))]
 
-    for epoch in range(3):
+    print 'Primes to test: ', ns_primes, 'Factoring', n_factored, 'primes for ', n_epochs, 'epochs'
+    for epoch in range(n_epochs):
         for i, n in enumerate(ns_primes):
-            print (str(epoch) + ':' + str(i) + ' = ' + str(n) + ' -- '),
-            time = test_n(n, n_factored)
+            print str(epoch) + '/' + str(n_epochs), ':', str(i) + '/' + str(len(ns_primes)), '(' + str(n) + ')', ' -- ',
+            time = test_n(n, n_factored, gens[i])
             print (time)
-            results[n].append(time)
+            results[i] += time
+        print
 
-    average_results = [(sum(results[n_primes]),n_primes) for n_primes in results]
+    average_results = [(sum_time/n_epochs,n_primes) for (sum_time,n_primes) in zip(results,ns_primes)]
     print(sorted(average_results))
 
 
