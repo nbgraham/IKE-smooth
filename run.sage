@@ -8,13 +8,13 @@ pref = 113038384112950627112915298112892539 # 0b10101110001010011100011111110000
 min_max_prime_factor = p
 bestResult = (float("inf"),pref,0)
 
-small_primes = primes_first_n(23100000)
-# Almost reaches the max prime computable by sage (pari): 436273290
+small_primes = primes_first_n(10000)
 
 new_results = []
 count_As_factored = 1
 
 start_time = time.time()
+
 
 def search_space():
 	base = pref*100
