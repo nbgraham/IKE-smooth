@@ -39,7 +39,8 @@ def smart_search(bit_chop):
         while count < space_size:
             if r <= threshold:
                 yield (a,r)
-            elif not str.startswith(r.binary(), bin_prefix):
+            
+            if not str.startswith(r.binary(), bin_prefix):
                 a += bit_chop
                 r = (r * giant_step) % p
             else:
@@ -66,6 +67,7 @@ def test(gen):
     i = _sage_const_0 
     sizes = []
     for (a,r) in gen:
+        print(a)
         sizes.append(len(r.binary()))
         i += _sage_const_1 
         if i > _sage_const_100 :
