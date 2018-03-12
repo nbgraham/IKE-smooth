@@ -20,6 +20,23 @@ start_from_checkpoint = 1
 # 113038384112950627112915298112892539006000000000000000000000000000000000000000000 for 10000 primes
 
 
+def batch_gen(gen, batch_start, batch_size):
+	yield batch_start
+	for _ in range(batch_size-1):
+		batch_i = next(gen)
+		if batch_i is not None:
+			yield batch_i
+		else:
+			break
+
+
+def batchify(gen, batch_size):
+	batch_start = next(gen, None)
+	while batch_start is not None:
+		yield batch_gen(gen, batch_start, batch_size)
+		batch_start = next(gen,None)
+
+
 def smart_search(bit_chop):
     threshold = p >> bit_chop
     bin_prefix = '1'+'0'*bit_chop
@@ -82,15 +99,15 @@ def power_max_prime_fact(input):
 						p_offset = count_p
 					n_eq = n_eq + p
 					count_p += 1
-				print 'Checking mod p took', time.time() - start, 'seconds'
+				# print 'Checking mod p took', time.time() - start, 'seconds'
 
 			if count_As_factored % 100 == 0:
 				bestResult = min([min(new_results),bestResult])
 				new_results = []
 			count_As_factored += 1
 
-	if A % pref == 0:
-		print 'time', int(time.time()-start_time), 'bestA', bestResult[1], 'bestOffset', bestResult[2]
+	# if A % pref == 0:
+	# 	print 'time', int(time.time()-start_time), 'bestA', bestResult[1], 'bestOffset', bestResult[2]
 	
 	result = (max_p_fact,A,p_offset)
 	new_results.append(result)
@@ -129,19 +146,29 @@ def seq():
 
 def par():
 	pool = multiprocessing.Pool(3)
-	out = zip(*pool.map(power_max_prime_fact, smart_search(27)))
-	result = min(zip(*out))
+	
+	batch_count = 0
+	bestResult = (p,0,0)
+	for batch_generator in batchify(smart_search(27),1000):
+		out = zip(*pool.map(power_max_prime_fact, batch_generator))
+		result = min(zip(*out))
 
-	mess = result[0]
-	bestA = result[1]
-	p_offset = result[2]
+		if result[0] < bestResult:
+			bestResult = result
+
+		batch_count += 1
+		print 'Batch', batch_count, 'bestA', bestResult[1], 'with p offset', bestResult[2]
+
+	max_p_factor = bestResult[0]
+	bestA = bestResult[1]
+	p_offset = bestResult[2]
 
 	return bestA, p_offset
 
 def main():	
 	start = time.time()
 
-	bestA, p_offset = seq()
+	bestA, p_offset = par()
 
 	print
 	print '-'*15
