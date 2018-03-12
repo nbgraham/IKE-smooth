@@ -8,7 +8,7 @@ pref = 113038384112950627112915298112892539 # 0b10101110001010011100011111110000
 min_max_prime_factor = p
 bestResult = (float("inf"),pref,0)
 
-small_primes = primes_first_n(10000)
+small_primes = primes_first_n(100000)
 
 new_results = []
 count_As_factored = 1
@@ -16,13 +16,28 @@ count_As_factored = 1
 start_time = time.time()
 
 
+start_from_checkpoint = 1
+# 113038384112950627112915298112892539006000000000000000000000000000000000000000000 for 10000 primes
+
+
 def search_space():
+	gen = search_space_()
+	val = 1
+	while val < start_from_checkpoint:
+		val = next(gen)
+	for a in gen:
+		yield a
+
+
+def search_space_():
 	base = pref*100
-	step = pref
+	step = 1
 	for power in range(3,342):
 		base = base * 10
+		val = base
 		for i in range(1000):
-			yield (base + i)
+			yield val
+			val = val + step
 		step = step * 10 
                            
 
