@@ -20,31 +20,37 @@ start_from_checkpoint = 1
 # 113038384112950627112915298112892539006000000000000000000000000000000000000000000 for 10000 primes
 
 
-def search_space():
-	gen = search_space_()
-	val = 1
-	while val < start_from_checkpoint:
-		val = next(gen)
-	for a in gen:
-		yield a
+def smart_search(bit_chop):
+    threshold = p >> bit_chop
+    bin_prefix = '1'+'0'*bit_chop
 
+    giant_step = 2.powermod(bit_chop,p)
 
-def search_space_():
-	base = pref*100
-	step = 1
-	for power in range(3,342):
-		base = base * 10
-		val = base
-		for i in range(1000):
-			yield val
-			val = val + step
-		step = step * 10 
+    space_size = 10**10
+    a = pref * space_size
+    r = 2.powermod(a,p)
+    
+    for i in range(10,100):
+        count = 0
+        while count < space_size:
+            if r <= threshold:
+                yield (a,r)
+            elif not str.startswith(r.binary(), bin_prefix):
+                a += bit_chop
+                r = (r * giant_step) % p
+            else:
+                a += 1
+                r = r*2 if r <= half_p else (r*2) - p
+            count += 1
+        space_size *= 10
+        a *= 10
+        r = r.powermod(10,p)
                            
 
-def power_max_prime_fact(A):
+def power_max_prime_fact(input):
 	global bestResult, new_results, count_As_factored
 	
-	n = 2.powermod(A,p)
+	(A,n) = input
 	p_offset = 0
 
 	if n == 1 or is_pseudoprime(n) and is_prime(n):
@@ -111,8 +117,8 @@ def max_prime_fact(cur_n):
 
 def seq():
 	global bestResult
-	for A in search_space():
-		(max_p_fact,A) = power_max_prime_fact(A)
+	for (A,n) in smart_search(27):
+		(max_p_fact,A,p_offset) = power_max_prime_fact((A,n))
 		if max_p_fact < bestResult[0]:
 			bestResult = (max_p_fact,A)
 	bestA = bestResult[1]
@@ -123,7 +129,7 @@ def seq():
 
 def par():
 	pool = multiprocessing.Pool(3)
-	out = zip(*pool.map(power_max_prime_fact, search_space()))
+	out = zip(*pool.map(power_max_prime_fact, smart_search(27)))
 	result = min(zip(*out))
 
 	mess = result[0]
@@ -135,7 +141,7 @@ def par():
 def main():	
 	start = time.time()
 
-	bestA, p_offset = par()	
+	bestA, p_offset = seq()
 
 	print
 	print '-'*15
