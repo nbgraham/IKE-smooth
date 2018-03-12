@@ -69,8 +69,9 @@ def test(gen):
 
 
 def main():
+    b = int(sys.argv[1])
     start = time.time()
-    avg_size = test(smart_search(25))
+    avg_size = test(smart_search(b))
     print (avg_size)
     print(time.time() - start)
 
