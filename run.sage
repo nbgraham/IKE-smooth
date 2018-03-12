@@ -1,78 +1,58 @@
 import time
 import multiprocessing
+from batch import batchify, gen_after_checkpoint
+
 
 p = 0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE65381FFFFFFFFFFFFFFFF
 p_squared = p**2
+half_p = p >> 1
 pref = 113038384112950627112915298112892539 # 0b101011100010100111000111111100000010010001110000011111111111101001010000000011010101010011001011001011110111001111011
 
+small_primes = primes_first_n(1000000)
+
 min_max_prime_factor = p
-bestResult = (float("inf"),pref,0)
-
-small_primes = primes_first_n(100000)
-
-new_results = []
-count_As_factored = 1
-
-start_time = time.time()
-
-
-start_from_checkpoint = 1
-# 113038384112950627112915298112892539006000000000000000000000000000000000000000000 for 10000 primes
-
-
-def batch_gen(gen, batch_start, batch_size):
-	yield batch_start
-	for _ in range(batch_size-1):
-		batch_i = next(gen)
-		if batch_i is not None:
-			yield batch_i
-		else:
-			break
-
-
-def batchify(gen, batch_size):
-	batch_start = next(gen, None)
-	while batch_start is not None:
-		yield batch_gen(gen, batch_start, batch_size)
-		batch_start = next(gen,None)
+bestResult = (p,0,0)	
 
 
 def smart_search(bit_chop):
-    threshold = p >> bit_chop
-    bin_prefix = '1'+'0'*bit_chop
+	threshold = p >> bit_chop
+	bin_prefix = '1'+'0'*bit_chop
 
-    giant_step = 2.powermod(bit_chop,p)
+	giant_step = 2.powermod(bit_chop,p)
 
-    space_size = 10**10
-    a = pref * space_size
-    r = 2.powermod(a,p)
-    
-    for i in range(10,100):
-        count = 0
-        while count < space_size:
-            if r <= threshold:
-                yield (a,r)
-            elif not str.startswith(r.binary(), bin_prefix):
-                a += bit_chop
-                r = (r * giant_step) % p
-            else:
-                a += 1
-                r = r*2 if r <= half_p else (r*2) - p
-            count += 1
-        space_size *= 10
-        a *= 10
-        r = r.powermod(10,p)
-                           
+	space_size = 10**10
+	a = pref * space_size
+	r = 2.powermod(a,p)
+	
+	for i in range(10,100):
+		count = 0
+		while count < space_size:
+			if r <= threshold:
+				yield (a,r)
+
+			if not str.startswith(r.binary(), bin_prefix):
+				a += bit_chop
+				r = (r * giant_step) % p
+			else:
+				a += 1
+				if r <= half_p:
+					r = r << 1 # Times 2
+				else:
+					r = (r << 1) - p
+			count += 1
+		space_size *= 10
+		a *= 10
+		r = r.powermod(10,p)
+						   
 
 def power_max_prime_fact(input):
-	global bestResult, new_results, count_As_factored
+	global bestResult
 	
 	(A,n) = input
 	p_offset = 0
 
 	if n == 1 or is_pseudoprime(n) and is_prime(n):
 		max_p_fact = n
-		count_As_factored += 1
 	else:
 		max_p = 0
 		max_p_fact = float("inf")
@@ -88,8 +68,6 @@ def power_max_prime_fact(input):
 			
 			# If it is promising also try adding p's to RHS since that will be equivalent mod p
 			if max_p_fact < bestResult[0]:
-				print 'time', int(time.time()-start_time), 'Possible best A found', A
-				start = time.time()
 				n_eq = n + p
 				count_p = 1
 				while count_p < 10 and n_eq < p_squared:
@@ -99,18 +77,8 @@ def power_max_prime_fact(input):
 						p_offset = count_p
 					n_eq = n_eq + p
 					count_p += 1
-				# print 'Checking mod p took', time.time() - start, 'seconds'
 
-			if count_As_factored % 100 == 0:
-				bestResult = min([min(new_results),bestResult])
-				new_results = []
-			count_As_factored += 1
-
-	# if A % pref == 0:
-	# 	print 'time', int(time.time()-start_time), 'bestA', bestResult[1], 'bestOffset', bestResult[2]
-	
 	result = (max_p_fact,A,p_offset)
-	new_results.append(result)
 	return result
 
 
@@ -132,32 +100,57 @@ def max_prime_fact(cur_n):
 	return max_p_fact
 
 
-def seq():
+def seq(checkpoint, batch_size, bit_chop):
 	global bestResult
-	for (A,n) in smart_search(27):
-		(max_p_fact,A,p_offset) = power_max_prime_fact((A,n))
-		if max_p_fact < bestResult[0]:
-			bestResult = (max_p_fact,A)
+
+	start = time.time()
+
+	search_generator = smart_search(bit_chop)
+	checkpointed_search_generator = gen_after_checkpoint(search_generator, checkpoint, key=lambda x: x[0])
+
+	batch_count = 0
+	for batch in batchify(checkpointed_search_generator, batch_size):
+		for (A,n) in batch:
+			result = power_max_prime_fact((A,n))
+
+			if result[0] < bestResult[0]:
+				bestResult = result
+		batch_count += 1
+		
+		print time.time() - start, 'seconds'
+		print 'Batch', batch_count, 'lastA', result[1], 'bestA', bestResult[1], 'with p offset', bestResult[2]
+		
+	
+	max_p_factor = bestResult[0]
 	bestA = bestResult[1]
 	p_offset = bestResult[2]
 
-	return  bestA, p_offset
+	return bestA, p_offset
 
 
-def par():
-	pool = multiprocessing.Pool(3)
+def par(checkpoint, batch_size, bit_chop):
+	global bestResult
+
+	start = time.time()
+	pool = multiprocessing.Pool(4)
 	
+	search_generator = smart_search(bit_chop)
+	checkpointed_search_generator = gen_after_checkpoint(search_generator, checkpoint, key=lambda x: x[0])
+
 	batch_count = 0
-	bestResult = (p,0,0)
-	for batch_generator in batchify(smart_search(27),1000):
-		out = zip(*pool.map(power_max_prime_fact, batch_generator))
-		result = min(zip(*out))
-
-		if result[0] < bestResult:
-			bestResult = result
-
+	for batch in batchify(checkpointed_search_generator, batch_size):
+		out = pool.map(power_max_prime_fact, batch)
+		batchBestResult = min(out)
+		lastA = out[-1][1]
 		batch_count += 1
-		print 'Batch', batch_count, 'bestA', bestResult[1], 'with p offset', bestResult[2]
+
+		print time.time() - start, 'seconds'
+		print 'Batch', batch_count, 'lastA', lastA, 'bestA', batchBestResult[1], 'with p offset', batchBestResult[2]
+
+		if batchBestResult[0] < bestResult[0]:
+			bestResult = batchBestResult
+
+		print 'Overall: bestA', bestResult[1], 'with p offset', bestResult[2]
 
 	max_p_factor = bestResult[0]
 	bestA = bestResult[1]
@@ -165,10 +158,13 @@ def par():
 
 	return bestA, p_offset
 
-def main():	
-	start = time.time()
+def main():
+	if len(sys.argv) == 2:
+		checkpoint = int(sys.argv[1])
+	else:
+		checkpoint = 0
 
-	bestA, p_offset = par()
+	bestA, p_offset = par(checkpoint, 1000, 10)
 
 	print
 	print '-'*15
@@ -176,9 +172,6 @@ def main():
 	print "A=", bestA
 	print "offset by p*", p_offset
 	print "2^A=", factor(2.powermod(bestA,p) + p*p_offset)
-
-	runtime = time.time() - start
-	print runtime, "seconds"
 
 
 if __name__ == '__main__':
