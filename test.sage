@@ -13,7 +13,23 @@ def test(A, n_primes_used):
     r = 2.powermod(A,p)
     small_factors, big_factor = small(r, n_primes_used)
 
-    print(small_factors)
+    last = small_factors[0]
+    count = 1
+    for factor in small_factors[1:]:
+        if factor == last:
+            count += 1
+        else:
+            if count == 1:
+                print last, ' *',
+            else:
+                print last, '^', count, ' *',
+            last = factor
+            count = 1
+    if count == 1:
+        print last, ' *',
+    else:
+        print last, '^', count, ' *',
+
     print(big_factor)
     print(int(log(big_factor)/log(2)))
 

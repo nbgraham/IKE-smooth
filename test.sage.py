@@ -18,7 +18,23 @@ def test(A, n_primes_used):
     r = _sage_const_2 .powermod(A,p)
     small_factors, big_factor = small(r, n_primes_used)
 
-    print(small_factors)
+    last = small_factors[_sage_const_0 ]
+    count = _sage_const_1 
+    for factor in small_factors[_sage_const_1 :]:
+        if factor == last:
+            count += _sage_const_1 
+        else:
+            if count == _sage_const_1 :
+                print last, ' *',
+            else:
+                print last, '^', count, ' *',
+            last = factor
+            count = _sage_const_1 
+    if count == _sage_const_1 :
+        print last, ' *',
+    else:
+        print last, '^', count, ' *',
+
     print(big_factor)
     print(int(log(big_factor)/log(_sage_const_2 )))
 
