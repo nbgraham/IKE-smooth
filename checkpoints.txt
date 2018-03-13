@@ -1,0 +1,5 @@
+Ran to with new smart search with 200000 first primes: 1130383841129506271129152981128925390043528450
+
+
+Ran to with fixed new smart search (10 bit chop) with 1,000,000 first primes:
+1130383841129506271129152981128925390925071384
