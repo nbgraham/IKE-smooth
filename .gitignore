@@ -1,3 +1,4 @@
-.vscode/settings.json
-*.sage.py
+.vscode/*
 *.pyc
+tmp*
+*.sage.py
