@@ -17,15 +17,12 @@ bestResult = (p,0,0)
 
 def smart_search(bit_chop):
 	threshold = p >> bit_chop
-	bin_prefix = '1'+'0'*bit_chop
 
-	giant_step = 2.powermod(bit_chop,p)
-
-	space_size = 10**10
+	space_size = 10**1
 	a = pref * space_size
 	r = 2.powermod(a,p)
 	
-	for i in range(10,100):
+	for i in range(1,272):
 		count = 0
 		while count < space_size:
 			if r <= threshold:
@@ -59,22 +56,10 @@ def power_max_prime_fact(input):
 				cur_n = cur_n // fac
 				max_p = fac
 
-		max_p_fact = max(cur_n, max_p)
-		if max_p_fact < bestResult[0]:
+		max_p_fact_cand = max(cur_n, max_p)
+		if max_p_fact_cand < bestResult[0]:
 			if cur_n == 1 or is_pseudoprime(cur_n) and is_prime(cur_n):
-				
-				
-				# If it is promising also try adding p's to RHS since that will be equivalent mod p
-				
-				n_eq = n + p
-				count_p = 1
-				while count_p < 10 and n_eq < p_squared:
-					mod_max_p_fact = max_prime_fact(n_eq)
-					if mod_max_p_fact < max_p_fact:
-						max_p_fact = mod_max_p_fact
-						p_offset = count_p
-					n_eq = n_eq + p
-					count_p += 1
+				max_p_fact = max_p_fact_cand
 
 	result = (max_p_fact,A,p_offset)
 	return result
@@ -162,6 +147,7 @@ def main():
 	else:
 		checkpoint = 0
 
+	print 'Starting, batch size = 1000, bit chop = 10'
 	bestA, p_offset = par(checkpoint, 1000, 10)
 
 	print
