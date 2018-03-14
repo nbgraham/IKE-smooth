@@ -22,5 +22,6 @@ def gen_after_checkpoint(gen, checkpoint, key=lambda x: x):
 
 	print("Caught up to checkpoint")
 
+	yield v
 	for v in gen:
 		yield v
