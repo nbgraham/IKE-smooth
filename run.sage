@@ -59,11 +59,13 @@ def power_max_prime_fact(input):
 				cur_n = cur_n // fac
 				max_p = fac
 
-		if cur_n == 1 or is_pseudoprime(cur_n) and is_prime(cur_n):
-			max_p_fact = max(cur_n, max_p)
-			
-			# If it is promising also try adding p's to RHS since that will be equivalent mod p
-			if max_p_fact < bestResult[0]:
+		max_p_fact = max(cur_n, max_p)
+		if max_p_fact < bestResult[0]:
+			if cur_n == 1 or is_pseudoprime(cur_n) and is_prime(cur_n):
+				
+				
+				# If it is promising also try adding p's to RHS since that will be equivalent mod p
+				
 				n_eq = n + p
 				count_p = 1
 				while count_p < 10 and n_eq < p_squared:
