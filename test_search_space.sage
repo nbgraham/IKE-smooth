@@ -6,77 +6,112 @@ p = 0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B
 half_p = p //2
 
 def search_space_(base=pref*100):
-    step = 1
-    for power in range(3,342):
-        base = base * 10
-        val = base
-        r = 2.powermod(val,p)
-        step_r = 2.powermod(step,p)
-        for i in range(1000):
-            yield (val, r)
-            val = val + step
-            r = (r*step_r)%p
-        step = step * 10 
+	step = 1
+	for power in range(3,342):
+		base = base * 10
+		val = base
+		r = 2.powermod(val,p)
+		step_r = 2.powermod(step,p)
+		for i in range(1000):
+			yield (val, r)
+			val = val + step
+			r = (r*step_r)%p
+		step = step * 10 
 
 
 def smart_search(bit_chop):
-    threshold = p >> bit_chop
-    bin_prefix = '1'+'0'*bit_chop
+	threshold = p >> bit_chop
+	bin_prefix = '1'+'0'*bit_chop
 
-    giant_step = 2.powermod(bit_chop,p)
+	giant_step = 2.powermod(bit_chop,p)
 
-    space_size = 10**10
-    a = pref * space_size
-    r = 2.powermod(a,p)
-    
-    for i in range(10,100):
-        count = 0
-        while count < space_size:
-            if r <= threshold:
-                yield (a,r)
-            
-            if not str.startswith(r.binary(), bin_prefix):
-                a += bit_chop
-                r = (r * giant_step) % p
-            else:
-                a += 1
-                r = r*2 if r <= half_p else (r*2) - p
-            count += 1
-        space_size *= 10
-        a *= 10
-        r = r.powermod(10,p)
+	space_size = 10**10
+	a = pref * space_size
+	r = 2.powermod(a,p)
+	
+	for i in range(10,100):
+		count = 0
+		while count < space_size:
+			if r <= threshold:
+				yield (a,r)
+
+			if not str.startswith(r.binary(), bin_prefix):
+				a += bit_chop
+				r = (r * giant_step) % p
+			else:
+				a += 1
+				if r <= half_p:
+					r = r << 1 # Times 2
+				else:
+					r = (r << 1) - p
+			count += 1
+		space_size *= 10
+		a *= 10
+		r = r.powermod(10,p)
+
+
+def smart_search_(bit_chop):
+	threshold = p >> bit_chop
+
+	giant_step = 2.powermod(bit_chop,p)
+
+	space_size = 10**10
+	a = pref * space_size
+	r = 2.powermod(a,p)
+	
+	for i in range(10,100):
+		count = 0
+		while count < space_size:
+			if r <= threshold:
+				yield (a,r)
+
+			a += 1
+			if r <= half_p:
+				r = r << 1 # Times 2
+			else:
+				r = (r << 1) - p
+
+			count += 1
+		space_size *= 10
+		a *= 10
+		r = r.powermod(10,p)
 
 
 # Garbage
 def search_space():
-    b = pref * 100
-    for i in range(100):
-        gen = search_space_(b+i)
-        for (a,r) in gen:
-            if r <= threshold:
-                yield (a,r)
-    print("Checked all possible values")
-        
+	b = pref * 100
+	for i in range(100):
+		gen = search_space_(b+i)
+		for (a,r) in gen:
+			if r <= threshold:
+				yield (a,r)
+	print("Checked all possible values")
+		
 
 def test(gen):
-    i = 0
-    sizes = []
-    for (a,r) in gen:
-        print(a)
-        sizes.append(len(r.binary()))
-        i += 1
-        if i > 100:
-            break
-    return sum(sizes)/len(sizes)
+	i = 0
+	sizes = []
+	for (a,r) in gen:
+		sizes.append(len(r.binary()))
+		i += 1
+		if i > 100:
+			break
+	return sum(sizes)/len(sizes)
 
 
 def main():
-    b = int(sys.argv[1])
-    start = time.time()
-    avg_size = test(smart_search(b))
-    print (avg_size)
-    print(time.time() - start)
+	b = int(sys.argv[1])
+
+	start = time.time()
+	avg_size = test(smart_search(b))
+	print (avg_size)
+	print(time.time() - start)
+
+	start = time.time()
+	avg_size = test(smart_search_(b))
+	print (avg_size)
+	print(time.time() - start)
 
 
 if __name__ == '__main__':
-    main()
+	main()
