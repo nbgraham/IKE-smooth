@@ -30,16 +30,11 @@ def smart_search(bit_chop):
 		while count < space_size:
 			if r <= threshold:
 				yield (a,r)
-
-			if not str.startswith(r.binary(), bin_prefix):
-				a += bit_chop
-				r = (r * giant_step) % p
+			a += 1
+			if r <= half_p:
+				r = r << 1 # Times 2
 			else:
-				a += 1
-				if r <= half_p:
-					r = r << 1 # Times 2
-				else:
-					r = (r << 1) - p
+				r = (r << 1) - p
 			count += 1
 		space_size *= 10
 		a *= 10
