@@ -31,7 +31,7 @@ def test(A, n_primes_used):
         print last, '^', count, ' *',
 
     print(big_factor)
-    print(int(log(big_factor)/log(2)))
+    print(len(big_factor.binary()))
 
 
 # Example usage
