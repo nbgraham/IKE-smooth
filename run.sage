@@ -17,6 +17,7 @@ bestResult = (p,0,0)
 
 def smart_search(bit_chop):
 	threshold = p >> bit_chop
+	bottom_threshold = p >> (bit_chop + 1)
 
 	space_size = 10**1
 	a = pref * space_size
@@ -27,16 +28,25 @@ def smart_search(bit_chop):
 		while count < space_size:
 			if r <= threshold:
 				yield (a,r)
-			a += 1
-			if r <= half_p:
-				r = r << 1 # Times 2
+				if r > bottom_threshold:
+					a += bit_chop
+					count += bit_chop
+					r = r << bit_chop
+				else:
+					a += 1
+					count += 1
+					r = r << 1
 			else:
-				r = (r << 1) - p
-			count += 1
+				a += 1
+				count += 1
+				if r < half_p:
+					r = r << 1
+				else:
+					r = (r << 1) - p
 		space_size *= 10
 		a *= 10
 		r = r.powermod(10,p)
-						   
+				   
 
 def power_max_prime_fact(input):
 	global bestResult
