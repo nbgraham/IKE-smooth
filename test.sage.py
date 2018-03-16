@@ -36,7 +36,7 @@ def test(A, n_primes_used):
         print last, '^', count, ' *',
 
     print(big_factor)
-    print(int(log(big_factor)/log(_sage_const_2 )))
+    print(len(big_factor.binary()))
 
 
 # Example usage
