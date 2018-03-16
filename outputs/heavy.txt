@@ -1,0 +1,4 @@
+Starting, batch size = 4 bit chop = 20 with # primes:  23163200
+...
+Batch 1876 lastA 1130383841129506271129152981128925486558547744 bestA 1130383841129506271129152981128925486546865427 with p offset 0
+Overall: bestA 0 with p offset 0
