@@ -11,7 +11,8 @@ half_p = 0x7fffffffffffffffe487ed5110b4611a62633145c06e0e68948127044533e63a0105d
 pref = 0x15c538fe048e0fff4a01aa9965ee7b
 # 113038384112950627112915298112892539 
 
-small_primes = primes_first_n(1000000)
+n_primes = 23163200
+small_primes = primes_first_n(n_primes)
 
 bestResult = (p,0,0)	
 
@@ -157,8 +158,11 @@ def main():
 	else:
 		checkpoint = 0
 
-	print 'Starting, batch size = 1000, bit chop = 10'
-	bestA, p_offset = par(checkpoint, 1000, 10)
+	batch_size = 4
+	bit_chop = 15
+	print 'Starting, batch size =', batch_size, 'bit chop =', bit_chop, 'with # primes: ', n_primes
+
+	bestA, p_offset = par(checkpoint, batch_size, bit_chop)
 
 	print
 	print '-'*15
