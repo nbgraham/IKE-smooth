@@ -112,12 +112,16 @@ def par(checkpoint, batch_size, cutoff_batches, n_remainders, bit_chop):
 
         batchBestResult = min(out)
         
-        print time.time() - start, 'seconds'
+	runningTime = time.time() - start
+        print runningTime, 'seconds'
         batch_count += 1
         lastA = out[-1][1]
         print 'Batch', batch_count, 'lastA', lastA, 'bestA', batchBestResult[1]
 
 	# log checkpoint a's
+	file = open('checkpoint.log','w')
+	file.write("{0} \n Time {1}".format(batchBestResult[1], runningTime))
+	file.close()
 
         if batch_count % cutoff_batches == 0:
             best_results = sorted(best_results)[:n_remainders]
