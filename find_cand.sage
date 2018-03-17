@@ -120,7 +120,7 @@ def par(checkpoint, batch_size, cutoff_batches, n_remainders, bit_chop):
 
 	# log checkpoint a's
 	file = open('checkpoint.log','w')
-	file.write("{0} \n Time {1}".format(batchBestResult[1], runningTime))
+	file.write("{0} \n Time {1}".format(lastA, runningTime))
 	file.close()
 
         if batch_count % cutoff_batches == 0:
