@@ -17,18 +17,29 @@ small_primes = primes_first_n(n_primes)
 
 bestResult = (p,0)    
 
-def smart_search(bit_chop):
+def smart_search(bit_chop, checkpoint_a=0):
     threshold = p >> bit_chop
     bottom_threshold = threshold >> 1
 
-    space_size = 10**1
+    # Get to space size of checkpoint
+    search_space_starting_power = 1
+    space_size = 10**search_space_starting_power
     base_a = pref * space_size
-    a = base_a
-    base_r = 2.powermod(a,p)
-    r = base_r
+    while base_a <= checkpoint_a:
+        search_space_starting_power += 1
+        space_size *= 10
+        base_a *= 10
 
-    for i in range(1,272):
-        count = 0
+    # Get to the checkpoint in this space size, first with binary search
+    base_r = 2.powermod(base_a, p)
+
+    a = base_a if checkpoint_a == 0 else checkpoint_a
+    count = a - base_a
+        
+    r = base_r if a == base_a else r.powermod(a, p)
+
+    # Generate new numbers
+    for i in range(search_space_starting_power,272):
         while count < space_size:
             if r <= threshold:
                 yield (a,r)
@@ -52,6 +63,7 @@ def smart_search(bit_chop):
         space_size *= 10
         base_a *= 10
         a = base_a
+        count = 0
         base_r = r.powermod(10,p)
         r = base_r
                    
@@ -89,8 +101,7 @@ def par(checkpoint, batch_size, cutoff_batches, n_remainders, bit_chop):
     start = time.time()
     pool = multiprocessing.Pool(8)
     
-    search_generator = smart_search(bit_chop)
-    checkpointed_search_generator = gen_after_checkpoint(search_generator, checkpoint, key=lambda x: x[0])
+    search_generator = smart_search(bit_chop, checkpoint_a=checkpoint)
 
     best_results = []
     batch_count = 0
