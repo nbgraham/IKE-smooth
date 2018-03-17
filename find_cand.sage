@@ -23,11 +23,13 @@ def smart_search(bit_chop, checkpoint_a=0):
 
     # Get to space size of checkpoint
     search_space_starting_power = 1
+    space_size = 10**search_space_starting_power
     base_a = pref * space_size
+
     while base_a <= checkpoint_a:
         search_space_starting_power += 1
         base_a *= 10
-    space_size = 10**search_space_starting_power
+
 
     # Get to the checkpoint in this space size, setting everything correctly
     base_r = 2.powermod(base_a, p)
@@ -104,7 +106,7 @@ def par(checkpoint, batch_size, cutoff_batches, n_remainders, bit_chop):
 
     best_results = []
     batch_count = 0
-    for batch in batchify(checkpointed_search_generator, batch_size):
+    for batch in batchify(search_generator, batch_size):
         out = pool.map(power_max_prime_fact, batch)
         best_results.extend(out)
 
@@ -114,6 +116,8 @@ def par(checkpoint, batch_size, cutoff_batches, n_remainders, bit_chop):
         batch_count += 1
         lastA = out[-1][1]
         print 'Batch', batch_count, 'lastA', lastA, 'bestA', batchBestResult[1]
+
+	# log checkpoint a's
 
         if batch_count % cutoff_batches == 0:
             best_results = sorted(best_results)[:n_remainders]
