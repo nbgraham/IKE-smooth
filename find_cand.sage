@@ -37,7 +37,7 @@ def smart_search(bit_chop, checkpoint_a=0):
     a = base_a if checkpoint_a == 0 else checkpoint_a
     count = a - base_a
         
-    r = base_r if a == base_a else r.powermod(a, p)
+    r = base_r if a == base_a else 2.powermod(a, p)
 
     # Generate new numbers
     for i in range(search_space_starting_power,272):
@@ -65,7 +65,7 @@ def smart_search(bit_chop, checkpoint_a=0):
         base_a *= 10
         a = base_a
         count = 0
-        base_r = r.powermod(10,p)
+        base_r = base_r.powermod(10,p)
         r = base_r
                    
 
