@@ -87,7 +87,7 @@ def par(checkpoint, batch_size, cutoff_batches, n_remainders, bit_chop):
     global bestResult
 
     start = time.time()
-    pool = multiprocessing.Pool(4)
+    pool = multiprocessing.Pool(8)
     
     search_generator = smart_search(bit_chop)
     checkpointed_search_generator = gen_after_checkpoint(search_generator, checkpoint, key=lambda x: x[0])
@@ -126,7 +126,7 @@ def main():
     else:
         checkpoint = 0
 
-    batch_size = 8 
+    batch_size = 64
     bit_chop = 10
     cutoff_batches = 360
     n_remainders = 100
