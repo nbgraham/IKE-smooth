@@ -23,14 +23,13 @@ def smart_search(bit_chop, checkpoint_a=0):
 
     # Get to space size of checkpoint
     search_space_starting_power = 1
-    space_size = 10**search_space_starting_power
     base_a = pref * space_size
     while base_a <= checkpoint_a:
         search_space_starting_power += 1
-        space_size *= 10
         base_a *= 10
+    space_size = 10**search_space_starting_power
 
-    # Get to the checkpoint in this space size, first with binary search
+    # Get to the checkpoint in this space size, setting everything correctly
     base_r = 2.powermod(base_a, p)
 
     a = base_a if checkpoint_a == 0 else checkpoint_a
