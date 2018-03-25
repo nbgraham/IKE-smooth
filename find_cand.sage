@@ -1,7 +1,7 @@
 import time
 import multiprocessing
 from batch import batchify, gen_after_checkpoint
-
+import pickle
 
 p = 0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE65381FFFFFFFFFFFFFFFF
 p_squared = 0xffffffffffffffff921fb54442d184699556f620b115a80b1f5a43d393a37a0cba694b7b42283f8504feb4a8fa080a06ad9fd90cc3df8dcba988d9153adda61b3f58a9ca013666664e95cc8efd32f3851241e9a23e32083c65e695bef27bf7caa26ef814ca0fae5bfbac779564030f13a8ca2fdde22b0cf114c2a635dc1f2d1dc0ca825439ec8a2904208c18020acb48a8037947a0b9e31285367817f89b9ec170affb82e3dbfca0db7153d12d8d0c21ae3aae145d2e1ee9b067f5b48bafa35a10ccba67fcd2408f536d2998aa6fce0804595dc5e0bcfc56649487feb573488578e682787acb10e62ee7a152e03f4e376daf335c263358fc0000000000000001 
@@ -54,17 +54,16 @@ def power_max_prime_fact(input):
     
     (A,n) = input
 
-    if n == 1 or is_pseudoprime(n) and is_prime(n):
-        max_p_fact = n
-    else:
-        max_p = 0
-        
-        cur_n = n
-        for fac in small_primes:
-            while cur_n % fac == 0:
-                cur_n = cur_n // fac
-                max_p = fac
+    max_p = 0
+    
+    cur_n = n
+    for fac in small_primes:
+        while cur_n % fac == 0:
+            cur_n = cur_n // fac
+            max_p = fac
 
+    max_p_fact_cand = float("inf")
+    if cur_n == 1 or is_psuedoprime(cur_n):
         max_p_fact_cand = max(cur_n, max_p)
 
     result = (max_p_fact_cand, A)
@@ -113,7 +112,7 @@ def par(checkpoint, batch_size, cutoff_batches, n_remainders, bit_chop):
     for batch in batchify(checkpointed_search_generator, batch_size):
         out = pool.map(power_max_prime_fact, batch)
         batchBestResult = min(out)
-        best_results.append(batchBestResult)
+        best_results.extend(out)
         
         print time.time() - start, 'seconds'
         batch_count += 1
@@ -122,9 +121,9 @@ def par(checkpoint, batch_size, cutoff_batches, n_remainders, bit_chop):
 
         if batch_count % cutoff_batches == 0:
             best_results = sorted(best_results)[:n_remainders]
-            print 'Overall: bestAs'
-            for (a, r) in best_results:
-                print '    ', a, '--', r
+            print 'Saved best', len(best_results), 'to cand.pkl'
+            with open('cand.pkl','wb') as file:
+                pickle.dump(best_results, file)
 
     bestResult = best_results
     max_p_factor = bestResult[0]
@@ -139,10 +138,10 @@ def main():
     else:
         checkpoint = 0
 
-    batch_size = 4
+    batch_size = 16
     bit_chop = 10
-    cutoff_batches = 250
-    n_remainders = 100
+    cutoff_batches = 16
+    n_remainders = 10
 
     print 'Starting, batch size =', batch_size, 'bit chop =', bit_chop, 'with # primes: ', n_primes
 
