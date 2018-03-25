@@ -2,3 +2,7 @@
 *.pyc
 tmp*
 *.sage.py
+
+outputs/2018_03_12_15:56--result1\.txt
+
+outputs/2018_03_13_09:27--10chop1000000p\.txt

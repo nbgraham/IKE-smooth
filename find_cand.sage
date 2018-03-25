@@ -11,32 +11,48 @@ half_p = 0x7fffffffffffffffe487ed5110b4611a62633145c06e0e68948127044533e63a0105d
 pref = 0x15c538fe048e0fff4a01aa9965ee7b
 # 113038384112950627112915298112892539 
 
-n_primes = 23163200
+n_primes = 2222222
 small_primes = primes_first_n(n_primes)
 
 bestResult = (p,0)    
 
-def smart_search(bit_chop):
+def smart_search(bit_chop, checkpoint_a=0):
     threshold = p >> bit_chop
-    bottom_threshold = p >> (bit_chop + 1)
+    bottom_threshold = threshold >> 1
 
-    space_size = 10**1
-    a = pref * space_size
-    r = 2.powermod(a,p)
-    
-    for i in range(1,272):
-        count = 0
+    # Get to space size of checkpoint
+    search_space_starting_power = 1
+    space_size = 10**search_space_starting_power
+    base_a = pref * space_size
+
+    while base_a <= checkpoint_a:
+        search_space_starting_power += 1
+        base_a *= 10
+
+
+    # Get to the checkpoint in this space size, setting everything correctly
+    base_r = 2.powermod(base_a, p)
+
+    a = base_a if checkpoint_a == 0 else checkpoint_a
+    count = a - base_a
+        
+    r = base_r if a == base_a else 2.powermod(a, p)
+
+    # Generate new numbers
+    for i in range(search_space_starting_power,272):
         while count < space_size:
             if r <= threshold:
                 yield (a,r)
-                if r > bottom_threshold:
-                    a += bit_chop
-                    count += bit_chop
-                    r = r << bit_chop
-                else:
+
+                while r <= bottom_threshold:
                     a += 1
                     count += 1
                     r = r << 1
+                    yield (a,r)
+
+                a += bit_chop
+                count += bit_chop
+                r = r << bit_chop
             else:
                 a += 1
                 count += 1
@@ -45,85 +61,74 @@ def smart_search(bit_chop):
                 else:
                     r = (r << 1) - p
         space_size *= 10
-        a *= 10
-        r = r.powermod(10,p)
+        base_a *= 10
+        a = base_a
+        count = 0
+        base_r = base_r.powermod(10,p)
+        r = base_r
                    
 
 def power_max_prime_fact(input):
     global bestResult
     
     (A,n) = input
-
-    max_p = 0
     
-    cur_n = n
-    for fac in small_primes:
-        while cur_n % fac == 0:
-            cur_n = cur_n // fac
-            max_p = fac
-
     max_p_fact_cand = float("inf")
-    if cur_n == 1 or is_psuedoprime(cur_n):
-        max_p_fact_cand = max(cur_n, max_p)
+
+    if n == 1 or is_pseudoprime(n):
+        max_p_fact_cand = n
+    else:
+        max_p = 0
+        
+        cur_n = n
+        for fac in small_primes:
+            while cur_n % fac == 0:
+                cur_n = cur_n // fac
+                max_p = fac
+        
+        if cur_n == 1:
+            max_p_fact_cand = max_p
+        elif is_pseudoprime(cur_n):
+            max_p_fact_cand = cur_n
 
     result = (max_p_fact_cand, A)
     return result
-
-
-# def seq(checkpoint, batch_size, bit_chop):
-#     global bestResult
-
-#     start = time.time()
-
-#     search_generator = smart_search(bit_chop)
-#     checkpointed_search_generator = gen_after_checkpoint(search_generator, checkpoint, key=lambda x: x[0])
-
-#     batch_count = 0
-#     for batch in batchify(checkpointed_search_generator, batch_size):
-#         for (A,n) in batch:
-#             result = power_max_prime_fact((A,n))
-
-#             if result[0] < bestResult[0]:
-#                 bestResult = result
-#         batch_count += 1
-        
-#         print time.time() - start, 'seconds'
-#         print 'Batch', batch_count, 'lastA', result[1], 'bestA', bestResult[1], 'with p offset', bestResult[2]
-        
-    
-#     max_p_factor = bestResult[0]
-#     bestA = bestResult[1]
-#     p_offset = bestResult[2]
-
-#     return bestA, p_offset
 
 
 def par(checkpoint, batch_size, cutoff_batches, n_remainders, bit_chop):
     global bestResult
 
     start = time.time()
-    pool = multiprocessing.Pool(4)
+    pool = multiprocessing.Pool(8)
     
-    search_generator = smart_search(bit_chop)
-    checkpointed_search_generator = gen_after_checkpoint(search_generator, checkpoint, key=lambda x: x[0])
+    search_generator = smart_search(bit_chop, checkpoint_a=checkpoint)
 
     best_results = []
     batch_count = 0
-    for batch in batchify(checkpointed_search_generator, batch_size):
+    for batch in batchify(search_generator, batch_size):
         out = pool.map(power_max_prime_fact, batch)
-        batchBestResult = min(out)
         best_results.extend(out)
+
+        batchBestResult = min(out)
         
-        print time.time() - start, 'seconds'
+	runningTime = time.time() - start
+        print runningTime, 'seconds'
         batch_count += 1
         lastA = out[-1][1]
         print 'Batch', batch_count, 'lastA', lastA, 'bestA', batchBestResult[1]
 
+	# log checkpoint a's
+	file = open('checkpoint.log','w')
+	file.write("{0} \n Time {1}".format(lastA, runningTime))
+	file.close()
+
         if batch_count % cutoff_batches == 0:
             best_results = sorted(best_results)[:n_remainders]
-            print 'Saved best', len(best_results), 'to cand.pkl'
-            with open('cand.pkl','wb') as file:
+            with open('best_results.pkl','wb') as file:
                 pickle.dump(best_results, file)
+            print 'Overall: bestAs'
+            for (a, r) in best_results:
+                print '    ', a, '--', r
 
     bestResult = best_results
     max_p_factor = bestResult[0]
@@ -138,10 +143,10 @@ def main():
     else:
         checkpoint = 0
 
-    batch_size = 16
+    batch_size = 64
     bit_chop = 10
-    cutoff_batches = 16
-    n_remainders = 10
+    cutoff_batches = 360
+    n_remainders = 100
 
     print 'Starting, batch size =', batch_size, 'bit chop =', bit_chop, 'with # primes: ', n_primes
 
